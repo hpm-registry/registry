@@ -1,0 +1,44 @@
+name: validate
+
+on:
+  pull_request:
+    paths:
+      - "components/**"
+      - "footprints/**"
+      - "symbols/**"
+      - "3d_models/**"
+      - "schema/**"
+      - "scripts/**"
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Validate component files
+        run: python scripts/validate.py
+
+      - name: Check revision bumped for modified entries
+        if: github.event_name == 'pull_request'
+        run: python scripts/check_revision_bump.py ${{ github.event.pull_request.base.sha }}
+
+      - name: Verify index is up to date
+        run: |
+          python scripts/build_index.py
+          if [ -n "$(git status --porcelain index/)" ]; then
+            echo "::error::index/ is stale. Run 'python scripts/build_index.py' and commit the result."
+            git diff index/
+            exit 1
+          fi

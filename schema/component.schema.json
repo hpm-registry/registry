@@ -1,0 +1,477 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/OWNER/hpm-registry/schema/component.schema.json",
+  "title": "HPM Component Registry Entry",
+  "description": "Canonical schema for a single electronic component. Every file under components/ must validate against this schema. Specs are stored as structured value+unit pairs so machines can filter numerically; never embed units inside a value string.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "mpn",
+    "manufacturer",
+    "category",
+    "subcategory",
+    "description",
+    "package",
+    "lifecycle_status",
+    "specs",
+    "footprint",
+    "symbol",
+    "datasheet",
+    "meta"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": ["1.4.0", "1.5.0"],
+      "description": "Schema version this file was authored against. Use the latest version for new entries. Older versions remain valid so existing files do not need mass-migration on every schema update. When a new version is released, add it to the enum; do NOT remove old versions. Breaking changes (removing required fields, changing types) are prohibited — only additive changes are allowed between versions."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]([A-Z0-9._-]*[A-Z0-9])?$",
+      "description": "Canonical registry ID. Uppercase, derived from the primary MPN with slashes removed. Must equal the filename without the .json extension. Unique across the whole registry.",
+      "examples": ["AMS1117-3.3", "LM358-SOIC8", "GRM188R71H104KA93D"]
+    },
+    "mpn": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Manufacturer Part Number, exactly as printed on the manufacturer datasheet."
+    },
+    "manufacturer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Manufacturer name, canonical spelling (e.g. 'Texas Instruments', not 'TI'). See MANUFACTURERS.md for the canonical name list. If a manufacturer is not listed, add them there in the same PR."
+    },
+    "category": {
+      "type": "string",
+      "description": "Top-level category. MUST be one of the slugs defined in docs/TAXONOMY.md and MUST match the parent directory name.",
+      "enum": [
+        "resistors",
+        "capacitors",
+        "inductors",
+        "diodes",
+        "transistors",
+        "regulators",
+        "microcontrollers",
+        "logic-ics",
+        "analog-ics",
+        "interface-ics",
+        "memory",
+        "sensors",
+        "connectors",
+        "electromechanical",
+        "power-modules",
+        "crystals-oscillators",
+        "optoelectronics",
+        "protection"
+      ]
+    },
+    "subcategory": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+      "description": "Lower-level grouping slug. MUST match the immediate parent directory name and be listed under its category in docs/TAXONOMY.md.",
+      "examples": ["ldo", "smd-chip", "n-channel-mosfet"]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "description": "One-line human-readable summary. No marketing language."
+    },
+    "aliases": {
+      "type": "array",
+      "description": "Alternate MPNs and common misspellings that resolve to this exact part — same silicon, same package, different label. Used by the aliases index for O(1) lookup. Do NOT put pin-compatible substitutes here; use substitutes instead.",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "substitutes": {
+      "type": "array",
+      "description": "Pin-compatible parts from other manufacturers or families that can replace this part in a new design. Each entry MUST include a note explaining compatibility caveats — a substitute without context is dangerous. Agents must surface the note to the user before making a substitution.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "note"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]([A-Z0-9._-]*[A-Z0-9])?$",
+            "description": "Canonical registry ID of the substitute part. Must resolve to an entry in the registry."
+          },
+          "note": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Compatibility caveats. State what differs: voltage ratings, current limits, package tolerance, temp range, etc. E.g. 'Pin-compatible but max input voltage 6V vs 15V — verify supply rail before substituting.'"
+          }
+        }
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "variant_of": {
+      "type": ["string", "null"],
+      "pattern": "^[A-Z0-9]([A-Z0-9._-]*[A-Z0-9])?$",
+      "default": null,
+      "description": "Links package variants of the same silicon. When a part is sold in multiple packages (e.g. SOIC-8 and TSSOP-8), each package gets its own entry; all of them set variant_of to the SAME shared base id. The base id need not itself be a file. null for parts with no package variants.",
+      "examples": ["LM358", null]
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Industry-standard package name. Use the JEDEC or IPC designation where one exists. See docs/PACKAGES.md for canonical names and common aliases to avoid.",
+          "examples": ["SOT-23-3", "SOIC-8", "0402", "QFN-32"]
+        },
+        "type": {
+          "type": "string",
+          "enum": ["smd", "through-hole", "module", "bare-die"],
+          "description": "Assembly process category. 'module' covers power modules, wireless SoC modules, etc."
+        },
+        "pin_count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total number of pins, pads, or leads including power, ground, and no-connect pins."
+        }
+      }
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "enum": ["active", "not-recommended", "obsolete", "preliminary", "unknown"],
+      "description": "Production lifecycle. 'not-recommended' means the manufacturer still sells it but advises against new designs. 'unknown' is permitted but should be resolved before merge when possible."
+    },
+    "specs": {
+      "type": "object",
+      "description": "Electrical and physical parameters. Each parameter is a {value, unit} object (or {min,typ,max,unit} for ranged params) so machines can filter numerically. Keys are snake_case parameter names; common keys per category are listed in docs/SPEC_KEYS.md. At least one spec is required.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "value": { "type": ["number", "string", "boolean"] },
+          "min": { "type": "number" },
+          "typ": { "type": "number" },
+          "max": { "type": "number" },
+          "unit": {
+            "type": "string",
+            "description": "SI or standard EE unit. Must be one of the enumerated values to ensure numeric comparisons across entries are valid. Use empty string for dimensionless parameters (counts, ratios, boolean flags). Submit a PR to add a missing unit rather than using a non-standard string.",
+            "enum": [
+              "",
+              "V", "mV", "uV", "Vpp", "Vrms",
+              "A", "mA", "uA", "nA", "Arms",
+              "Ohm", "mOhm", "kOhm", "MOhm",
+              "F", "uF", "nF", "pF",
+              "H", "mH", "uH", "nH",
+              "W", "mW",
+              "Hz", "kHz", "MHz", "GHz",
+              "degC", "K",
+              "K/W", "degC/W",
+              "ppm", "ppm/degC",
+              "uV/degC", "mV/degC",
+              "s", "ms", "us", "ns", "ps",
+              "%", "%/degC",
+              "dB", "dBm",
+              "bps", "kbps", "Mbps", "Gbps",
+              "mm", "um", "nm", "inch",
+              "g", "mg",
+              "deg/s", "mdeg/s",
+              "Pa", "kPa", "hPa", "mbar", "bar",
+              "T", "mT", "uT", "Gauss",
+              "lux", "lm", "mcd", "cd",
+              "A/W",
+              "rpm",
+              "C", "mC", "uC", "Ah", "mAh",
+              "KB", "MB", "GB", "TB",
+              "bit", "byte", "Kbit", "Mbit", "Gbit"
+            ]
+          },
+          "at_frequency": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["value", "unit"],
+            "description": "Frequency at which this spec was measured. Required for frequency-dependent parameters such as ferrite bead impedance, capacitor ESR, inductor Q factor, and RF insertion loss. Omit for DC or frequency-independent specs.",
+            "properties": {
+              "value": { "type": "number", "exclusiveMinimum": 0 },
+              "unit": {
+                "type": "string",
+                "enum": ["Hz", "kHz", "MHz", "GHz"]
+              }
+            }
+          },
+          "notes": {
+            "type": "string",
+            "description": "Clarifying context for this specific parameter: test conditions, measurement method, applicable operating range, or exceptions. E.g. 'Measured at VIN=5V, IOUT=500mA, TA=25degC'."
+          }
+        },
+        "anyOf": [
+          { "required": ["value", "unit"] },
+          { "required": ["typ", "unit"] },
+          { "required": ["min", "unit"] },
+          { "required": ["max", "unit"] }
+        ]
+      }
+    },
+    "pins": {
+      "type": "object",
+      "description": "Pin map for this package variant. Keys are pin numbers (as strings: '1', '2', ...) or named pads ('A1', 'GND', 'EP'). Allows agents to wire components without parsing the .kicad_sym file. Strongly recommended for ICs; optional for passives where pin function is symmetric or obvious.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Pin name exactly as printed on the datasheet pin table (e.g. 'VCC', 'GND', 'IN+', 'OUT', 'NC')."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "power-in",
+              "power-out",
+              "ground",
+              "signal-in",
+              "signal-out",
+              "signal-bidir",
+              "passive",
+              "open-drain",
+              "open-collector",
+              "no-connect"
+            ],
+            "description": "Electrical type. Used by agents to validate connections and generate netlists. 'passive' for resistor/capacitor terminals. 'no-connect' for NC pins that must not be connected."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional clarification beyond the pin name. E.g. 'Shutdown input, active-low, internal pull-up' or 'Analog input, 0 to VREF range'."
+          }
+        }
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Regulatory compliance and qualification status. First-class field because compliance status affects design legality and supply chain decisions — free tags are insufficient for reliable compliance queries.",
+      "properties": {
+        "rohs": {
+          "type": "string",
+          "enum": ["compliant", "exempt", "non-compliant", "unknown"],
+          "description": "EU RoHS (Restriction of Hazardous Substances) Directive status. 'exempt' means the part qualifies under a specific RoHS exemption; document the exemption number in meta.tags."
+        },
+        "reach": {
+          "type": "string",
+          "enum": ["compliant", "svhc-declared", "non-compliant", "unknown"],
+          "description": "EU REACH regulation status. 'svhc-declared' means the part contains a Substance of Very High Concern above 0.1% w/w; the substance is declared and the part is REACH-compliant."
+        },
+        "aec_q": {
+          "type": "string",
+          "enum": ["AEC-Q100", "AEC-Q101", "AEC-Q102", "AEC-Q200", "none", "unknown"],
+          "description": "Automotive Electronics Council qualification grade. AEC-Q100: ICs. AEC-Q101: discrete semiconductors. AEC-Q102: optoelectronics. AEC-Q200: passive components. 'none' means explicitly not automotive-qualified — do not use 'unknown' for a part you know is commercial-grade."
+        },
+        "halogen_free": {
+          "type": "boolean",
+          "description": "Whether the part is halogen-free per IEC 61249-2-21 (Cl < 900 ppm, Br < 900 ppm, total halogens < 1500 ppm). Required for some environmental and flame-retardancy certifications."
+        }
+      }
+    },
+    "footprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "format", "format_version", "origin", "license"],
+      "description": "The PCB land-pattern, hosted in this repo. Every entry hosts its own file; HPM does not reference external libraries.",
+      "properties": {
+        "path": {
+          "type": ["string", "null"],
+          "pattern": "^footprints/.+\\.kicad_mod$",
+          "description": "Repo-relative path to the hosted .kicad_mod file under footprints/. The file MUST exist; the validator checks this. null only if the footprint is not yet sourced — discouraged for merge into main."
+        },
+        "format": {
+          "type": "string",
+          "const": "kicad_mod",
+          "description": "Footprint file format. KiCad .kicad_mod only."
+        },
+        "format_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "KiCad major.minor version the file is authored to be compatible with. This is the MINIMUM KiCad version that can open it: a file authored to '6.0' opens in KiCad 6 through 10; a file authored to '9.0' will not open in KiCad 8 or earlier. Author to the oldest version you reasonably can for maximum reach.",
+          "examples": ["6.0", "9.0", "10.0"]
+        },
+        "origin": {
+          "type": "string",
+          "minLength": 2,
+          "description": "Provenance of the file for attribution and license tracing. E.g. 'KiCad official library', 'drawn by contributor from manufacturer land pattern', 'manufacturer-provided'."
+        },
+        "license": {
+          "type": "string",
+          "minLength": 2,
+          "description": "SPDX license identifier of the hosted file. 'unknown' is accepted but flags the asset for later audit. A file known to be non-redistributable must NOT be hosted.",
+          "examples": ["CC-BY-SA-4.0", "MIT", "CC0-1.0", "unknown"]
+        }
+      }
+    },
+    "symbol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "format", "format_version", "origin", "license"],
+      "description": "The schematic symbol, hosted in this repo. Every entry hosts its own file; HPM does not reference external libraries.",
+      "properties": {
+        "path": {
+          "type": ["string", "null"],
+          "pattern": "^symbols/.+\\.kicad_sym$",
+          "description": "Repo-relative path to the hosted .kicad_sym file under symbols/. The file MUST exist; the validator checks this. null only if the symbol is not yet sourced — discouraged for merge into main."
+        },
+        "format": {
+          "type": "string",
+          "const": "kicad_sym",
+          "description": "Symbol file format. KiCad .kicad_sym only."
+        },
+        "format_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "KiCad major.minor version the file is authored to be compatible with. The .kicad_sym format has been stable since KiCad 6.0, so symbols should normally be authored to '6.0' for maximum reach.",
+          "examples": ["6.0", "9.0", "10.0"]
+        },
+        "origin": {
+          "type": "string",
+          "minLength": 2,
+          "description": "Provenance of the file, same convention as footprint.origin."
+        },
+        "license": {
+          "type": "string",
+          "minLength": 2,
+          "description": "SPDX license identifier, same convention as footprint.license.",
+          "examples": ["CC-BY-SA-4.0", "MIT", "CC0-1.0", "unknown"]
+        }
+      }
+    },
+    "3d_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "format", "origin", "license"],
+      "description": "3D model for mechanical integration and KiCad rendering. Optional — omit the field entirely if no model is available.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^3d_models/.+\\.(step|wrl)$",
+          "description": "Repo-relative path to the hosted 3D model file under 3d_models/. Mirrors the components/ tree: 3d_models/<category>/<subcategory>/<ID>.step"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["step", "wrl"],
+          "description": "File format. 'step' (STEP AP214) is the standard for mechanical CAD and preferred for KiCad 3D viewer accuracy. 'wrl' (VRML 2.0) is the legacy KiCad rendering format. Provide step where possible."
+        },
+        "origin": {
+          "type": "string",
+          "minLength": 2,
+          "description": "Provenance of the file, same convention as footprint.origin."
+        },
+        "license": {
+          "type": "string",
+          "minLength": 2,
+          "description": "SPDX license identifier, same convention as footprint.license.",
+          "examples": ["CC-BY-SA-4.0", "MIT", "CC0-1.0", "unknown"]
+        }
+      }
+    },
+    "datasheet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Direct link to the manufacturer datasheet PDF. Manufacturer-hosted URLs strongly preferred over distributor mirrors."
+        },
+        "archived_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Stable archived copy of the datasheet, e.g. a Wayback Machine URL (https://web.archive.org/web/<timestamp>/<original-url>). Strongly recommended for any manufacturer whose web presence is uncertain."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hex digest of the datasheet PDF at the time specs were transcribed. Allows future verification that the referenced document has not changed. Compute with: sha256sum <file>.pdf"
+        },
+        "revision": {
+          "type": "string",
+          "description": "Datasheet revision string or date exactly as printed on the datasheet cover page (e.g. 'Rev. C', 'SLOS068J', '2023-04'). The specs in this entry were transcribed from this revision."
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added", "revision", "history", "verified"],
+      "if": {
+        "properties": { "verified": { "const": true } },
+        "required": ["verified"]
+      },
+      "then": {
+        "required": ["verified_by"]
+      },
+      "properties": {
+        "added": {
+          "type": "string",
+          "format": "date",
+          "description": "ISO 8601 date the entry was first added to the registry. Set once at creation; never updated."
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Version of this registry ENTRY (the data record), not the physical part. Monotonically increments by 1 on every substantive change. MUST equal the length of the history array. Starts at 1."
+        },
+        "history": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Human-readable changelog of this entry, one object per revision in ascending order. Git holds the authoritative diff; this array is the in-file summary for quick inspection.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["revision", "date", "by", "change"],
+            "properties": {
+              "revision": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "Revision number this entry describes. Must be 1 for the first entry and increment by 1 for each subsequent entry."
+              },
+              "date": {
+                "type": "string",
+                "format": "date",
+                "description": "ISO 8601 date this revision was merged."
+              },
+              "by": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$",
+                "description": "GitHub handle of the contributor who made this change. No @ prefix. Must be a valid GitHub username (1-39 chars, alphanumeric and hyphens, cannot start or end with a hyphen)."
+              },
+              "change": {
+                "type": "string",
+                "minLength": 8,
+                "description": "Short summary of what changed. Be specific: 'Corrected dropout_voltage typ from 1.3V to 1.1V per datasheet Rev C' not 'Fixed spec'."
+              }
+            }
+          }
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "True only if a human contributor has cross-checked every spec field against the cited datasheet revision and confirms they match. Unverified entries are usable but agents should warn users before using them in production designs."
+        },
+        "verified_by": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$",
+          "description": "GitHub handle of the contributor who verified this entry. Required when verified is true. Enforced by schema if/then."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "default": [],
+          "description": "Free-form discovery tags for attributes not covered by structured fields. E.g. 'jellybean', 'low-noise', 'high-side'. Do NOT use tags for compliance status — use the compliance field."
+        }
+      }
+    }
+  }
+}
