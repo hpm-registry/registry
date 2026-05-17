@@ -9,12 +9,19 @@ on:
       - "3d_models/**"
       - "schema/**"
       - "scripts/**"
+      - "incoming/**"
   push:
     branches: [main]
+
+# Cancel any in-progress run for the same branch/PR when a new commit is pushed.
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,12 +30,40 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install dependencies
         run: pip install jsonschema
 
+      # Prevent accidentally committing a real API key via .env
+      - name: Check for secrets leak
+        if: github.event_name == 'pull_request'
+        run: |
+          if git show --stat HEAD | grep -q "^\.env$"; then
+            echo "::error file=.env::.env is tracked in this commit — remove it and rotate the API key immediately."
+            exit 1
+          fi
+          if git diff ${{ github.event.pull_request.base.sha }}...HEAD -- .env | grep -qE '^\+ANTHROPIC_API_KEY=sk-'; then
+            echo "::error file=.env::An Anthropic API key was added to .env — remove it and rotate the key immediately."
+            exit 1
+          fi
+
+      # incoming/ is a local staging folder — no part files should ever be merged.
+      - name: Check incoming/ is clean
+        if: github.event_name == 'pull_request'
+        run: |
+          PART_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...HEAD \
+            | grep '^incoming/' | grep -v '^incoming/README\.md' || true)
+          if [ -n "$PART_FILES" ]; then
+            echo "::error::incoming/ contains files that must not be merged. Remove them from the PR:"
+            for f in $PART_FILES; do
+              echo "  $f"
+            done
+            exit 1
+          fi
+
       - name: Validate component files
-        run: python scripts/validate.py
+        run: python scripts/ci_validate.py
 
       - name: Check revision bumped for modified entries
         if: github.event_name == 'pull_request'

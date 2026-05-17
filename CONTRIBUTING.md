@@ -32,8 +32,11 @@ export ANTHROPIC_API_KEY=sk-ant-...   # get one at https://console.anthropic.com
 Drop your files into the `incoming/` folder (see `incoming/README.md`), then:
 
 ```bash
-python scripts/add_part.py --github your-github-handle
+python scripts/add_part.py
 ```
+
+The script will prompt you for your GitHub username and the URL you downloaded
+the datasheet from.
 
 The script auto-detects the datasheet, footprint(s), symbol, and 3D model from
 `incoming/`. If you have multiple `.kicad_mod` files in there (IPC density
@@ -223,10 +226,12 @@ For each file, fill in the component entry's `footprint` / `symbol` block:
 - `format_version` — the minimum KiCad major.minor that can open it. Author to
   the oldest version you can. Symbols have been stable since `"6.0"`.
 - `origin` — where the file came from (e.g. `"KiCad official library"`,
-  `"drawn from manufacturer land pattern"`)
-- `license` — SPDX identifier. Use `"unknown"` if you can't determine it, but
-  **never host a file you know is non-redistributable** — many SnapEDA and Ultra
-  Librarian files are not freely redistributable.
+  `"drawn from manufacturer land pattern"`). This is required for attribution.
+
+**License policy:** all hosted footprints and symbols must be **CC-BY-SA-4.0**
+(KiCad official library) or **CC0-1.0** (original contributor work). Do not host
+files from SnapEDA, Ultra Librarian, or other sources whose terms prohibit
+redistribution.
 
 ---
 
@@ -261,8 +266,7 @@ python scripts/validate.py
 ```
 
 Exit code 0 means clean. CI runs the same check and will block your PR on any
-error. Fix all errors before opening; warnings (unknown license, unverified entry)
-are allowed to merge.
+error. Fix all errors before opening; warnings (unverified entry) are allowed to merge.
 
 ---
 
@@ -273,5 +277,6 @@ are allowed to merge.
 - **Don't invent a new category folder** — open an issue. New categories require
   a schema PR reviewed by maintainers.
 - **Don't bulk-import unverified data** — small and correct beats large and wrong.
-- **Don't host non-redistributable files** — check the license before adding any
-  footprint or symbol from a third-party source.
+- **Don't host non-redistributable files** — only CC-BY-SA-4.0 and CC0-1.0
+  assets are accepted. SnapEDA and Ultra Librarian files are typically not
+  freely redistributable and must not be hosted.

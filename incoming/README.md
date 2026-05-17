@@ -15,8 +15,12 @@ incoming/
 Then run:
 
 ```bash
-python scripts/add_part.py --github your-github-handle
+python scripts/add_part.py
 ```
+
+The script will prompt you for your GitHub username and the URL you downloaded
+the datasheet from. URLs are never generated automatically — they must come
+from you to avoid hallucination.
 
 The script auto-detects the files in this folder. Once it completes, this
 folder is cleared and the files live in the registry under `components/`,

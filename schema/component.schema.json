@@ -279,8 +279,8 @@
     "footprint": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["path", "format", "format_version", "origin", "license"],
-      "description": "The PCB land-pattern, hosted in this repo. Every entry hosts its own file; HPM does not reference external libraries.",
+      "required": ["path", "format", "format_version", "origin"],
+      "description": "The PCB land-pattern, hosted in this repo. Every entry hosts its own file; HPM does not reference external libraries. All hosted footprints must be CC-BY-SA-4.0 or CC0-1.0 — this is enforced by policy, not per-file field.",
       "properties": {
         "path": {
           "type": ["string", "null"],
@@ -301,21 +301,15 @@
         "origin": {
           "type": "string",
           "minLength": 2,
-          "description": "Provenance of the file for attribution and license tracing. E.g. 'KiCad official library', 'drawn by contributor from manufacturer land pattern', 'manufacturer-provided'."
-        },
-        "license": {
-          "type": "string",
-          "minLength": 2,
-          "description": "SPDX license identifier of the hosted file. 'unknown' is accepted but flags the asset for later audit. A file known to be non-redistributable must NOT be hosted.",
-          "examples": ["CC-BY-SA-4.0", "MIT", "CC0-1.0", "unknown"]
+          "description": "Provenance of the file for attribution compliance. E.g. 'KiCad official library', 'drawn by contributor from manufacturer land pattern', 'manufacturer-provided'."
         }
       }
     },
     "symbol": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["path", "format", "format_version", "origin", "license"],
-      "description": "The schematic symbol, hosted in this repo. Every entry hosts its own file; HPM does not reference external libraries.",
+      "required": ["path", "format", "format_version", "origin"],
+      "description": "The schematic symbol, hosted in this repo. Every entry hosts its own file; HPM does not reference external libraries. All hosted symbols must be CC-BY-SA-4.0 or CC0-1.0 — this is enforced by policy, not per-file field.",
       "properties": {
         "path": {
           "type": ["string", "null"],
@@ -337,19 +331,13 @@
           "type": "string",
           "minLength": 2,
           "description": "Provenance of the file, same convention as footprint.origin."
-        },
-        "license": {
-          "type": "string",
-          "minLength": 2,
-          "description": "SPDX license identifier, same convention as footprint.license.",
-          "examples": ["CC-BY-SA-4.0", "MIT", "CC0-1.0", "unknown"]
         }
       }
     },
     "3d_model": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["path", "format", "origin", "license"],
+      "required": ["path", "format", "origin"],
       "description": "3D model for mechanical integration and KiCad rendering. Optional — omit the field entirely if no model is available.",
       "properties": {
         "path": {
@@ -366,12 +354,6 @@
           "type": "string",
           "minLength": 2,
           "description": "Provenance of the file, same convention as footprint.origin."
-        },
-        "license": {
-          "type": "string",
-          "minLength": 2,
-          "description": "SPDX license identifier, same convention as footprint.license.",
-          "examples": ["CC-BY-SA-4.0", "MIT", "CC0-1.0", "unknown"]
         }
       }
     },

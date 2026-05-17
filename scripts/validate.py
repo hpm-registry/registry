@@ -110,11 +110,6 @@ def check_hosted_assets(data, errors, warnings):
             errors.append(
                 f"{field}.path '{path}' does not point to an existing file"
             )
-        # 'unknown' license is allowed but flagged for audit
-        if block.get("license") == "unknown":
-            warnings.append(
-                f"{field}.license is 'unknown' - flagged for later license audit"
-            )
 
     # If a 3d_model is declared, warn if the footprint file has no (model ...) block.
     if data.get("3d_model") and isinstance(data.get("footprint"), dict):

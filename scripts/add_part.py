@@ -96,12 +96,14 @@ Required fields (you must populate all of them):
                            Use "notes" key for test conditions: {"typ": 1.1, "unit": "V", "notes": "VIN=5V, IOUT=500mA"}
                            For frequency-dependent specs add: "at_frequency": {"value": 100, "unit": "MHz"}
   footprint        object  {"path": null, "format": "kicad_mod", "format_version": "6.0",
-                             "origin": "contributor-provided", "license": "unknown"}
+                             "origin": "contributor-provided"}
                            Leave path as null — the script fills it.
   symbol           object  {"path": null, "format": "kicad_sym", "format_version": "6.0",
-                             "origin": "contributor-provided", "license": "unknown"}
+                             "origin": "contributor-provided"}
                            Leave path as null — the script fills it.
-  datasheet        object  {"url": "<manufacturer URL to PDF>"}
+  datasheet        object  {"url": null}
+                           ALWAYS set url to null — do NOT generate, guess, or infer a URL.
+                           The contributor will supply the correct URL separately.
                            Also include "revision" if visible on the cover page (e.g. "Rev. C").
                            Do NOT include sha256 — that requires downloading the file.
   meta             object  DO NOT include meta.added, meta.revision, or meta.history —
@@ -338,7 +340,6 @@ def build_entries(base_data, footprint_variants, symbol_path, model_path, github
                 "path": f"3d_models/{cat}/{sub}/{eid}.{model_ext}",
                 "format": model_ext,
                 "origin": "contributor-provided",
-                "license": "unknown",
             }
 
         # Fill meta (script-managed fields)
@@ -553,16 +554,15 @@ def main():
         epilog=(
             "Examples:\n"
             "  # Auto-detect from incoming/ (recommended):\n"
-            "  python scripts/add_part.py --github myhandle\n\n"
+            "  python scripts/add_part.py\n\n"
             "  # Explicit paths:\n"
             "  python scripts/add_part.py \\\n"
-            "      --datasheet ds.pdf --footprint PART.kicad_mod \\\n"
-            "      --symbol PART.kicad_sym --github myhandle\n\n"
+            "      --datasheet ds.pdf --footprint PART.kicad_mod --symbol PART.kicad_sym\n\n"
             "  # Multiple density variants (explicit):\n"
             "  python scripts/add_part.py \\\n"
             "      --datasheet ds.pdf \\\n"
             "      --footprint PART.kicad_mod --footprint PART-L.kicad_mod \\\n"
-            "      --symbol PART.kicad_sym --model PART.step --github myhandle\n"
+            "      --symbol PART.kicad_sym --model PART.step\n"
         ),
     )
     parser.add_argument("--datasheet", metavar="PDF",
@@ -573,11 +573,23 @@ def main():
                         help="Path to the .kicad_sym file (auto-detected from incoming/ if omitted)")
     parser.add_argument("--model", metavar="STEP",
                         help="Path to a .step or .wrl 3D model (auto-detected from incoming/ if omitted)")
-    parser.add_argument("--github", required=True, metavar="HANDLE",
-                        help="Your GitHub username (no @ prefix)")
     args = parser.parse_args()
 
     api_key = check_api_key()
+
+    # Prompt for contributor info
+    print()
+    try:
+        github_handle = input("GitHub username (no @ prefix): ").strip()
+        if not github_handle:
+            sys.exit("ERROR: GitHub username cannot be empty.")
+        datasheet_url = input("Datasheet URL (where you downloaded the PDF from): ").strip()
+        if not datasheet_url:
+            sys.exit("ERROR: Datasheet URL cannot be empty.")
+    except (EOFError, KeyboardInterrupt):
+        print("\nAborted.")
+        sys.exit(0)
+    print()
 
     # Resolve file paths: explicit args win; fall back to incoming/ scan
     if not args.datasheet and not args.footprint and not args.symbol:
@@ -607,6 +619,9 @@ def main():
     base_data = extract_with_llm(args.datasheet, api_key)
     print("Extraction complete.")
 
+    # Inject the contributor-supplied datasheet URL (never trust the LLM for URLs)
+    base_data.setdefault("datasheet", {})["url"] = datasheet_url
+
     # Step 2: Variant detection
     variants = detect_variants(args.footprint)
     if len(variants) > 1:
@@ -616,7 +631,7 @@ def main():
             print(f"  {Path(fp).name}  →  suffix '{tag}'")
 
     # Step 3: Build entry JSONs
-    entries = build_entries(base_data, variants, args.symbol, args.model, args.github, today)
+    entries = build_entries(base_data, variants, args.symbol, args.model, github_handle, today)
 
     # Step 4: Interactive review
     entries = review_entries(entries)
