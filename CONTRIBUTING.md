@@ -5,6 +5,56 @@ a missing one. Everything below is designed to keep data correct at community sc
 
 ---
 
+## Quick start (recommended)
+
+The fastest way to add a part is with `scripts/add_part.py`. It uses Claude to
+extract structured data from the manufacturer datasheet, walks you through a
+review step, then places all files into the correct locations and validates.
+
+**What you need to gather first:**
+
+| File | Required | Notes |
+|---|---|---|
+| Datasheet PDF | Yes | Manufacturer-hosted preferred |
+| `.kicad_mod` footprint | Yes | One per IPC density variant (L/M/nominal) |
+| `.kicad_sym` symbol | Yes | KiCad 6+ format |
+| `.step` or `.wrl` 3D model | No | Adds 3D view in KiCad |
+
+**Setup (once):**
+
+```bash
+pip install -r requirements.txt
+export ANTHROPIC_API_KEY=sk-ant-...   # get one at https://console.anthropic.com
+```
+
+**Run:**
+
+Drop your files into the `incoming/` folder (see `incoming/README.md`), then:
+
+```bash
+python scripts/add_part.py --github your-github-handle
+```
+
+The script auto-detects the datasheet, footprint(s), symbol, and 3D model from
+`incoming/`. If you have multiple `.kicad_mod` files in there (IPC density
+variants), all of them are picked up and registered as linked variants.
+
+The script will show you the proposed JSON before writing anything — review it,
+correct any extraction errors, then confirm. It validates and rebuilds the index
+automatically, leaving you with a clean `git add` / `git commit` / PR.
+
+**After the script runs, review the entry** and set `meta.verified: true` +
+`meta.verified_by: "your-handle"` only after you've cross-checked every spec
+against the datasheet yourself.
+
+---
+
+## Manual process
+
+If you prefer to fill the JSON by hand, follow Steps 1–7 below.
+
+---
+
 ## What a part is
 
 Every part is three files in parallel locations, all sharing the same stem:
