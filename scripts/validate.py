@@ -116,6 +116,17 @@ def check_hosted_assets(data, errors, warnings):
                 f"{field}.license is 'unknown' - flagged for later license audit"
             )
 
+    # If a 3d_model is declared, warn if the footprint file has no (model ...) block.
+    if data.get("3d_model") and isinstance(data.get("footprint"), dict):
+        fp_path = data["footprint"].get("path")
+        if fp_path:
+            fp_file = REPO_ROOT / fp_path
+            if fp_file.is_file() and "(model " not in fp_file.read_text():
+                warnings.append(
+                    "3d_model is declared but the footprint file has no (model ...) block; "
+                    "KiCad won't display the 3D model until the footprint links to it"
+                )
+
 
 def main():
     validator = load_schema()
