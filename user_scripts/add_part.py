@@ -31,6 +31,7 @@ Requires:
 
 import argparse
 import base64
+import difflib
 import json
 import os
 import shutil
@@ -45,6 +46,8 @@ from dotenv import load_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 INCOMING_DIR = REPO_ROOT / "incoming"
+INDEX_BY_ID = REPO_ROOT / "index" / "by-id.json"
+INDEX_ALIASES = REPO_ROOT / "index" / "aliases.json"
 MODEL = "claude-opus-4-7"
 
 load_dotenv(REPO_ROOT / ".env")
@@ -328,6 +331,146 @@ def check_prohibited_files(footprint_paths, symbol_path):
     )
     print()
     sys.exit(1)
+
+
+def _load_registry_index():
+    """Return (by_id, aliases, mpn_map) from the current index.
+
+    mpn_map: {mpn_upper: (canonical_id, full_path, entry_dict)}
+    Falls back to scanning components/ if the index is empty.
+    """
+    by_id = {}
+    aliases = {}
+    if INDEX_BY_ID.is_file():
+        with open(INDEX_BY_ID) as f:
+            by_id = json.load(f)
+    if INDEX_ALIASES.is_file():
+        with open(INDEX_ALIASES) as f:
+            aliases = json.load(f)
+
+    mpn_map = {}
+    for cid, rel_path in by_id.items():
+        full_path = REPO_ROOT / rel_path
+        try:
+            with open(full_path) as f:
+                entry = json.load(f)
+            mpn = entry.get("mpn", "")
+            if mpn:
+                mpn_map[mpn.upper()] = (cid, full_path, entry)
+        except (OSError, json.JSONDecodeError):
+            continue
+
+    return by_id, aliases, mpn_map
+
+
+def _add_alias(proposed_mpn, canonical_id, canonical_path, canonical_entry, github_handle, today):
+    """Append proposed_mpn to an existing entry's aliases list and write it back."""
+    aliases_list = canonical_entry.setdefault("aliases", [])
+    if proposed_mpn not in aliases_list:
+        aliases_list.append(proposed_mpn)
+
+    meta = canonical_entry.setdefault("meta", {})
+    rev = meta.get("revision", 0) + 1
+    meta["revision"] = rev
+    meta.setdefault("history", []).append({
+        "revision": rev,
+        "date": today,
+        "by": github_handle,
+        "change": f"Added {proposed_mpn} as alias",
+    })
+
+    with open(canonical_path, "w") as f:
+        json.dump(canonical_entry, f, indent=2)
+        f.write("\n")
+
+    rel = canonical_path.relative_to(REPO_ROOT)
+    print(f"\n  Updated: {rel}")
+    print(f"  Added '{proposed_mpn}' to aliases of {canonical_id}.")
+
+    print("\nRunning validator...")
+    subprocess.run([sys.executable, str(REPO_ROOT / "system_scripts" / "validate.py"),
+                    str(canonical_path)])
+    print("\nRebuilding index...")
+    subprocess.run([sys.executable, str(REPO_ROOT / "system_scripts" / "build_index.py")])
+
+    print(f"\n✓ Done. Next steps:")
+    print(f"  git add components/ index/")
+    print(f'  git commit -m "add alias {proposed_mpn} → {canonical_id}"')
+    print("  git push && open a PR")
+    sys.exit(0)
+
+
+def check_duplicate(base_data, github_handle, today):
+    """Check whether the proposed part already exists or should be an alias.
+
+    Exits or handles alias addition in place. Returns normally if safe to add.
+    """
+    proposed_id = base_data.get("id", "").upper()
+    proposed_mpn = base_data.get("mpn", "")
+    proposed_mpn_upper = proposed_mpn.upper()
+
+    by_id, aliases, mpn_map = _load_registry_index()
+
+    # 1. Exact ID collision
+    if proposed_id in {k.upper() for k in by_id}:
+        canonical_id = next(k for k in by_id if k.upper() == proposed_id)
+        print(f"\n✗ A part with ID '{canonical_id}' already exists:")
+        print(f"  {by_id[canonical_id]}")
+        print("\n  To update this entry, run: python user_scripts/update_part.py")
+        sys.exit(1)
+
+    # 2. Proposed MPN is already a registered alias
+    aliases_upper = {k.upper(): (k, v) for k, v in aliases.items()}
+    if proposed_mpn_upper in aliases_upper:
+        _, canonical_id = aliases_upper[proposed_mpn_upper]
+        canonical_path = by_id.get(canonical_id, "")
+        print(f"\n✗ '{proposed_mpn}' is already listed as an alias of {canonical_id}")
+        print(f"  ({canonical_path})")
+        print("\n  This part is already covered by the registry. No new entry needed.")
+        print("  To update specs or files, run: python user_scripts/update_part.py")
+        sys.exit(1)
+
+    # 3. Exact MPN match against an existing entry's mpn field
+    if proposed_mpn_upper in mpn_map:
+        canonical_id, canonical_path, _ = mpn_map[proposed_mpn_upper]
+        print(f"\n✗ A part with MPN '{proposed_mpn}' already exists as '{canonical_id}':")
+        print(f"  {canonical_path.relative_to(REPO_ROOT)}")
+        print("\n  To update this entry, run: python user_scripts/update_part.py")
+        sys.exit(1)
+
+    # 4. Near-exact MPN match (≥ 0.92) — possible packaging variant / alias candidate
+    best_ratio, best_match = 0.0, None
+    for existing_mpn_upper, (cid, path, entry) in mpn_map.items():
+        ratio = difflib.SequenceMatcher(None, proposed_mpn_upper, existing_mpn_upper).ratio()
+        if ratio > best_ratio:
+            best_ratio = ratio
+            best_match = (cid, path, entry)
+
+    if best_ratio >= 0.92 and best_match:
+        cid, path, entry = best_match
+        existing_mpn = entry.get("mpn", cid)
+        print(f"\n⚠  '{proposed_mpn}' is not in the registry, but '{existing_mpn}' already exists.")
+        print(f"   {entry.get('description', '')}")
+        print()
+        print(f"   This looks like a packaging variant (e.g. a tape/reel or grade suffix).")
+        print(f"   Packaging variants of the same silicon should be aliases, not new entries.")
+        print()
+        print(f"   1. Add '{proposed_mpn}' as an alias of {cid} (recommended)")
+        print(f"   2. Continue adding as a new entry anyway")
+        print()
+        while True:
+            try:
+                choice = input("   Choice [1/2]: ").strip()
+            except (EOFError, KeyboardInterrupt):
+                print("\nAborted.")
+                sys.exit(0)
+            if choice == "1":
+                _add_alias(proposed_mpn, cid, path, entry, github_handle, today)
+            elif choice == "2":
+                print()
+                break
+            else:
+                print("   Please enter 1 or 2.")
 
 
 def extract_with_llm(datasheet_path, api_key):
@@ -742,6 +885,9 @@ def main():
 
     # Inject the contributor-supplied datasheet URL (never trust the LLM for URLs)
     base_data.setdefault("datasheet", {})["url"] = datasheet_url
+
+    # Duplicate / alias check — exits or prompts before any files are written
+    check_duplicate(base_data, github_handle, today)
 
     # Step 2: Variant detection
     variants = detect_variants(args.footprint)
