@@ -32,7 +32,8 @@ hpm-registry/
 │   └── by-spec/             # numeric spec index for agent filtering
 ├── incoming/                # contributor staging area — never merged
 ├── user_scripts/
-│   └── add_part.py          # contributor CLI — adds a part end-to-end
+│   ├── add_part.py          # contributor CLI — adds a part end-to-end
+│   └── update_part.py       # contributor CLI — updates an existing part
 ├── system_scripts/
 │   ├── validate.py          # local schema + filesystem checker
 │   ├── ci_validate.py       # strict merge-gate validator (GitHub Actions)

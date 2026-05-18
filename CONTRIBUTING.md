@@ -35,12 +35,14 @@ Drop your files into the `incoming/` folder (see `incoming/README.md`), then:
 python user_scripts/add_part.py
 ```
 
-The script will prompt you for your GitHub username and the URL you downloaded
-the datasheet from.
-
 The script auto-detects the datasheet, footprint(s), symbol, and 3D model from
-`incoming/`. If you have multiple `.kicad_mod` files in there (IPC density
-variants), all of them are picked up and registered as linked variants.
+`incoming/`. It will prompt you for:
+- Your GitHub username
+- The datasheet PDF URL (where you downloaded it from)
+- The origin of each file (manufacturer site, drawn from datasheet, KiCad library, or other)
+
+If you have multiple `.kicad_mod` files in `incoming/` (IPC density variants),
+all of them are picked up and registered as linked variants.
 
 The script will show you the proposed JSON before writing anything — review it,
 correct any extraction errors, then confirm. It validates and rebuilds the index
@@ -49,6 +51,22 @@ automatically, leaving you with a clean `git add` / `git commit` / PR.
 **After the script runs, review the entry** and set `meta.verified: true` +
 `meta.verified_by: "your-handle"` only after you've cross-checked every spec
 against the datasheet yourself.
+
+---
+
+## Updating an existing part
+
+To correct a spec, replace a footprint, or re-extract from a new datasheet
+revision, use `user_scripts/update_part.py`:
+
+```bash
+python user_scripts/update_part.py
+```
+
+Drop the replacement files (footprint, symbol, 3D model, or new datasheet PDF)
+into `incoming/` first. The script auto-detects the part from those files,
+confirms the match, lets you choose what to update, then bumps `meta.revision`
+and appends a `meta.history` entry automatically.
 
 ---
 
@@ -231,12 +249,14 @@ For each file, fill in the component entry's `footprint` / `symbol` block:
 **License policy:** all hosted footprints and symbols must be **CC-BY-SA-4.0**
 (KiCad official library) or **CC0-1.0** (original contributor work).
 
-**Do not use files from DigiKey, SnapMagic, or UltraLibrarian.**
-DigiKey's component pages link to downloads provided by SnapMagic (formerly
-SnapEDA) and UltraLibrarian. Both services grant a license to use files in your
-own designs only — they explicitly prohibit redistribution. "Free to download"
-is not the same as "free to redistribute." Contributing these files to HPM
-violates their terms of service regardless of where you downloaded them from.
+**Do not use files from DigiKey, SnapMagic, UltraLibrarian, or SamacSys.**
+DigiKey, Mouser, and Arrow component pages link to downloads provided by
+SnapMagic (formerly SnapEDA), UltraLibrarian, or SamacSys. These services grant
+a license to use files in your own designs only — they explicitly prohibit
+redistribution. "Free to download" is not the same as "free to redistribute."
+Contributing these files to HPM violates their terms of service regardless of
+where you downloaded them from. The script detects and rejects these files
+automatically based on generator strings embedded in the file.
 
 **Accepted sources:**
 - **KiCad official library** — CC-BY-SA-4.0, fully redistributable
@@ -288,5 +308,6 @@ error. Fix all errors before opening; warnings (unverified entry) are allowed to
   a schema PR reviewed by maintainers.
 - **Don't bulk-import unverified data** — small and correct beats large and wrong.
 - **Don't host non-redistributable files** — only CC-BY-SA-4.0 and CC0-1.0
-  assets are accepted. SnapEDA and Ultra Librarian files are typically not
-  freely redistributable and must not be hosted.
+  assets are accepted. Files from SnapMagic/SnapEDA, UltraLibrarian, SamacSys,
+  or Mouser Part Wizard are not freely redistributable and must not be hosted.
+  The CI validator will block PRs containing these files.
