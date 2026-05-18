@@ -31,11 +31,13 @@ hpm-registry/
 │   ├── variants.json        # {variant_base: [ids]} package-variant groups
 │   └── by-spec/             # numeric spec index for agent filtering
 ├── incoming/                # contributor staging area — never merged
-├── scripts/
-│   ├── add_part.py          # contributor CLI — adds a part end-to-end
+├── user_scripts/
+│   └── add_part.py          # contributor CLI — adds a part end-to-end
+├── system_scripts/
 │   ├── validate.py          # local schema + filesystem checker
 │   ├── ci_validate.py       # strict merge-gate validator (GitHub Actions)
-│   └── build_index.py       # regenerates index/ from components/
+│   ├── build_index.py       # regenerates index/ from components/
+│   └── check_revision_bump.py  # CI: ensures modified entries bump revision
 ├── requirements.txt         # pip dependencies for scripts
 └── MANUFACTURERS.md         # canonical manufacturer name list
 ```
@@ -67,12 +69,12 @@ source of truth if they ever disagree.
 
 ## For human contributors
 
-The fastest path is `scripts/add_part.py`. Drop your datasheet PDF, KiCad
+The fastest path is `user_scripts/add_part.py`. Drop your datasheet PDF, KiCad
 footprint(s), and symbol into the `incoming/` folder, then run:
 
 ```bash
 pip install -r requirements.txt
-python scripts/add_part.py
+python user_scripts/add_part.py
 ```
 
 The script uses Claude to extract structured data from the datasheet, shows you

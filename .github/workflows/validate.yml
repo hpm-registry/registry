@@ -8,7 +8,8 @@ on:
       - "symbols/**"
       - "3d_models/**"
       - "schema/**"
-      - "scripts/**"
+      - "user_scripts/**"
+      - "system_scripts/**"
       - "incoming/**"
   push:
     branches: [main]
@@ -63,17 +64,17 @@ jobs:
           fi
 
       - name: Validate component files
-        run: python scripts/ci_validate.py
+        run: python system_scripts/ci_validate.py
 
       - name: Check revision bumped for modified entries
         if: github.event_name == 'pull_request'
-        run: python scripts/check_revision_bump.py ${{ github.event.pull_request.base.sha }}
+        run: python system_scripts/check_revision_bump.py ${{ github.event.pull_request.base.sha }}
 
       - name: Verify index is up to date
         run: |
-          python scripts/build_index.py
+          python system_scripts/build_index.py
           if [ -n "$(git status --porcelain index/)" ]; then
-            echo "::error::index/ is stale. Run 'python scripts/build_index.py' and commit the result."
+            echo "::error::index/ is stale. Run 'python system_scripts/build_index.py' and commit the result."
             git diff index/
             exit 1
           fi

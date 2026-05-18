@@ -1,6 +1,6 @@
 # incoming/
 
-Drop your contribution files here before running `scripts/add_part.py`.
+Drop your contribution files here before running `user_scripts/add_part.py`.
 
 ```
 incoming/
@@ -15,7 +15,7 @@ incoming/
 Then run:
 
 ```bash
-python scripts/add_part.py
+python user_scripts/add_part.py
 ```
 
 The script will prompt you for your GitHub username and the URL you downloaded
