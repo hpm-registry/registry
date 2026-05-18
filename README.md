@@ -30,10 +30,14 @@ hpm-registry/
 │   ├── aliases.json         # {alias: canonical_id}
 │   ├── variants.json        # {variant_base: [ids]} package-variant groups
 │   └── by-spec/             # numeric spec index for agent filtering
+├── incoming/                # contributor staging area — never merged
 ├── scripts/
-│   ├── validate.py          # schema + filesystem-convention checker (CI)
+│   ├── add_part.py          # contributor CLI — adds a part end-to-end
+│   ├── validate.py          # local schema + filesystem checker
+│   ├── ci_validate.py       # strict merge-gate validator (GitHub Actions)
 │   └── build_index.py       # regenerates index/ from components/
-├── MANUFACTURERS.md         # canonical manufacturer name list
+├── requirements.txt         # pip dependencies for scripts
+└── MANUFACTURERS.md         # canonical manufacturer name list
 ```
 
 ## How the file system works
@@ -63,9 +67,19 @@ source of truth if they ever disagree.
 
 ## For human contributors
 
-See **[CONTRIBUTING.md](CONTRIBUTING.md)**. In short: find the right folder in
-the category table, fill in real datasheet-sourced values, run
-`python scripts/validate.py`, open a PR.
+The fastest path is `scripts/add_part.py`. Drop your datasheet PDF, KiCad
+footprint(s), and symbol into the `incoming/` folder, then run:
+
+```bash
+pip install -r requirements.txt
+python scripts/add_part.py
+```
+
+The script uses Claude to extract structured data from the datasheet, shows you
+a review step, places all files into the correct registry locations, and
+validates everything — leaving you with a clean `git commit` and PR.
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full contributor guide.
 
 ## License
 
@@ -73,7 +87,8 @@ Component data (specs, metadata) is contributed under CC0. Tooling and schema
 under MIT. See `LICENSE`.
 
 Footprints and symbols are **hosted** in this repo (`footprints/`, `symbols/`),
-not referenced from external libraries. Each hosted file carries its own
-`license` and `origin` in the component entry — a hosted file keeps the license
-of wherever it came from. Files with an `unknown` license are accepted but
-flagged for audit; files known to be non-redistributable must not be hosted.
+not referenced from external libraries. All hosted assets must be
+**CC-BY-SA-4.0** (KiCad official library) or **CC0-1.0** (original contributor
+work). Files from DigiKey, SnapMagic, UltraLibrarian, or SamacSys are not
+accepted — those services prohibit redistribution. The `origin` field in each
+component entry records provenance for attribution compliance.

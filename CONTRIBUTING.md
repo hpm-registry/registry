@@ -229,9 +229,19 @@ For each file, fill in the component entry's `footprint` / `symbol` block:
   `"drawn from manufacturer land pattern"`). This is required for attribution.
 
 **License policy:** all hosted footprints and symbols must be **CC-BY-SA-4.0**
-(KiCad official library) or **CC0-1.0** (original contributor work). Do not host
-files from SnapEDA, Ultra Librarian, or other sources whose terms prohibit
-redistribution.
+(KiCad official library) or **CC0-1.0** (original contributor work).
+
+**Do not use files from DigiKey, SnapMagic, or UltraLibrarian.**
+DigiKey's component pages link to downloads provided by SnapMagic (formerly
+SnapEDA) and UltraLibrarian. Both services grant a license to use files in your
+own designs only — they explicitly prohibit redistribution. "Free to download"
+is not the same as "free to redistribute." Contributing these files to HPM
+violates their terms of service regardless of where you downloaded them from.
+
+**Accepted sources:**
+- **KiCad official library** — CC-BY-SA-4.0, fully redistributable
+- **Drawn yourself from the manufacturer datasheet** — your original work, use CC0-1.0
+- **Manufacturer-provided** — check their specific terms before hosting; some (e.g. Texas Instruments) grant redistribution rights, most do not
 
 ---
 
