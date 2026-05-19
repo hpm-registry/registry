@@ -62,11 +62,11 @@ Given a manufacturer datasheet PDF, extract component metadata and return a
 single JSON object that validates against the schema below. Return ONLY valid
 JSON — no markdown fences, no explanation, no prose.
 
-=== SCHEMA (schema_version 1.5.0) ===
+=== SCHEMA (schema_version 1.7.0) ===
 
 Required fields (you must populate all of them):
 
-  schema_version   string  Always "1.5.0"
+  schema_version   string  Always "1.7.0"
   id               string  Uppercase MPN with slashes replaced by hyphens.
                            Pattern: ^[A-Z0-9]([A-Z0-9._-]*[A-Z0-9])?$
                            Example: "AMS1117-3.3", "MMBT3904", "GRM155R71C104KA88D"
@@ -134,6 +134,56 @@ Optional fields (include when the datasheet has clear data):
                            }
   meta.tags        array   Free-form discovery tags, e.g. ["jellybean", "low-noise"]
 
+  pin_functions    object  For ICs with alternate-function pins (MCUs, interface ICs, etc.).
+                           Keys are peripheral names exactly as in the datasheet (e.g. "SPI1",
+                           "UART2", "I2C1", "USB", "CAN1", "ADC1"). Values are arrays of strings
+                           in "PAD/FUNCTION" format, e.g. "PA5/SCK".
+                           Rules:
+                           - List the default/primary pin mapping for each peripheral.
+                           - Include ADC channel mappings (e.g. "ADC1": ["PA0/IN0", "PA1/IN1"]).
+                           - If two peripherals share the same physical pins and are mutually
+                             exclusive in hardware (e.g. USB and CAN both on PA11/PA12 on STM32),
+                             add a "notes" key at the top level of pin_functions listing the
+                             conflict: "notes": "USB and CAN share PA11/PA12; only one can be
+                             used at a time."
+                           - Omit for passives (resistors, capacitors, inductors).
+                           Example:
+                           {
+                             "notes": "USB and CAN share PA11/PA12; mutually exclusive.",
+                             "SPI1": ["PA4/NSS", "PA5/SCK", "PA6/MISO", "PA7/MOSI"],
+                             "I2C1": ["PB6/SCL", "PB7/SDA"],
+                             "USB":  ["PA11/DM", "PA12/DP"],
+                             "CAN":  ["PA11/RX", "PA12/TX"],
+                             "ADC1": ["PA0/IN0", "PA1/IN1", "PA2/IN2"]
+                           }
+
+  power_domains    array   Power supply domains. Each entry groups pins that connect to one
+                           supply rail, with voltage and decoupling info so agents can
+                           generate correct power delivery networks.
+                           Each item:
+                           {
+                             "name": "VDD",              // domain name as in datasheet
+                             "pins": ["VDD", "VDDA"],    // pin names on this rail
+                             "voltage": {"min": 2.0, "max": 3.6, "unit": "V"},  // optional if same as supply_voltage
+                             "decoupling": "100nF ceramic + 4.7uF bulk per VDD pin; 1uF + 10nF on VDDA"
+                           }
+                           Include all distinct supply domains found in the datasheet.
+
+  required_externals array  External components required for minimum operation per the
+                           datasheet application circuit. Include: decoupling caps,
+                           boot-strapping resistors, reset RC networks, crystal load caps,
+                           pull-ups/downs mandated by the datasheet. Do NOT include
+                           application-specific components.
+                           Each item:
+                           {
+                             "value": "10k",
+                             "description": "BOOT0 pull-down for normal Flash boot",
+                             "connects": ["BOOT0", "GND"],
+                             "notes": "optional note"
+                           }
+                           "value" and "notes" are optional. "description" and "connects"
+                           (array of 2+ net names) are required.
+
 === TAXONOMY ===
 
 resistors:          smd-chip, through-hole, potentiometer, current-sense, resistor-array
@@ -195,6 +245,14 @@ Resistors:          resistance, tolerance, power_rating, tcr
 Capacitors:         capacitance, voltage_rating, tolerance, esr, dielectric
 Inductors:          inductance, current_rating, dcr, saturation_current, srf
 General:            operating_temperature, storage_temperature, package_height
+Microcontrollers:   core, cpu_frequency_max, flash_memory, sram, gpio_count,
+                    adc_resolution, adc_channels, adc_count, dac_channels,
+                    timer_count, usart_count, spi_count, i2c_count, dma_channels,
+                    supply_voltage, idd_run, idd_stop, idd_standby,
+                    operating_temperature,
+                    usb, can, ethernet,
+                    spi_max_speed (MHz), i2c_max_speed (kHz), usart_max_speed (Mbps),
+                    i2s_max_speed (MHz) — include any peripheral max speeds from the datasheet
 
 === OUTPUT FORMAT ===
 
@@ -489,7 +547,7 @@ def extract_with_llm(datasheet_path, api_key):
         try:
             response = client.messages.create(
                 model=MODEL,
-                max_tokens=4096,
+                max_tokens=8192,
                 system=SYSTEM_PROMPT,
                 messages=[{
                     "role": "user",
