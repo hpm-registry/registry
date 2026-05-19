@@ -112,6 +112,11 @@
       "name": "VIN",
       "type": "power-in",
       "description": "Input supply voltage"
+    },
+    "4": {
+      "name": "TAB",
+      "type": "power-out",
+      "description": "Exposed tab, electrically connected to pin 2 (VOUT). Must be soldered for thermal performance."
     }
   },
   "power_domains": [
@@ -186,13 +191,19 @@
       "3v3"
     ],
     "added": "2026-05-19",
-    "revision": 1,
+    "revision": 2,
     "history": [
       {
         "revision": 1,
         "date": "2026-05-19",
         "by": "JoonSJPK",
         "change": "Initial entry"
+      },
+      {
+        "revision": 2,
+        "date": "2026-05-19",
+        "by": "JoonSJPK",
+        "change": "Added tab pin 4 (VOUT) for SOT-223 thermal pad"
       }
     ]
   }

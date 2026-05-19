@@ -120,11 +120,20 @@ Optional fields (include when the datasheet has clear data):
                            Example: ["MMBT3904LT1G", "MMBT3904WT1G"]
   substitutes      array   Pin-compatible alternatives: [{"id": "OTHER-ID", "note": "caveat text"}]
   variant_of       null    Leave as null (script sets this for multi-footprint runs).
-  pins             object  For ICs: keyed by pin number string "1", "2", etc.
+  pins             object  For ICs and regulators: keyed by pin number string "1", "2", etc.
                            Each value: {"name": "VCC", "type": "<pin_type>", "description": "optional"}
                            Pin types: power-in | power-out | ground | signal-in | signal-out |
                                       signal-bidir | passive | open-drain | open-collector | no-connect
                            Omit for passives (resistors, capacitors, inductors) where pins are symmetric.
+                           IMPORTANT — exposed tabs and thermal pads: packages such as SOT-223, QFN,
+                           DFN, DPAK, D2PAK, and TO-263 have an exposed metal tab or thermal pad that
+                           is a separate solderable pad on the PCB footprint. Always include it as a
+                           numbered pin matching its footprint pad number (e.g. "4" for SOT-223-3,
+                           "33" for a QFN-32 with center pad). Set its name to "TAB" or "EP" (exposed
+                           pad) as printed in the datasheet, type to the appropriate electrical type
+                           (usually "ground" or "power-out"), and note which numbered pin it is
+                           electrically connected to, e.g. "Exposed tab, electrically connected to
+                           pin 2 (VOUT). Must be soldered for thermal performance."
   compliance       object  Include if datasheet mentions compliance:
                            {
                              "rohs": "compliant" | "exempt" | "non-compliant" | "unknown",
