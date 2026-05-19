@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.7.0",
+  "id": "GRM155R71C104KA88D",
+  "mpn": "GRM155R71C104KA88D",
+  "manufacturer": "Murata",
+  "category": "capacitors",
+  "subcategory": "mlcc",
+  "description": "0.1uF 16V X7R MLCC ceramic capacitor, 0402, \u00b110%",
+  "package": {
+    "name": "0402",
+    "type": "smd",
+    "pin_count": 2
+  },
+  "lifecycle_status": "active",
+  "specs": {
+    "capacitance": {
+      "value": 0.1,
+      "unit": "uF",
+      "notes": "Nominal at 0V bias. Capacitance derates significantly under DC bias (X7R) — verify at operating voltage using Murata SimSurfing before use in precision or power applications"
+    },
+    "voltage_rating": {
+      "value": 16,
+      "unit": "V"
+    },
+    "tolerance": {
+      "value": "\u00b110",
+      "unit": "%"
+    },
+    "dielectric": {
+      "value": "X7R",
+      "unit": ""
+    },
+    "capacitance_change": {
+      "min": -15,
+      "max": 15,
+      "unit": "%",
+      "notes": "-55\u00b0C to +125\u00b0C, X7R characteristic"
+    },
+    "operating_temperature": {
+      "min": -55,
+      "max": 125,
+      "unit": "degC"
+    },
+    "package_length": {
+      "value": 1.0,
+      "unit": "mm"
+    },
+    "package_width": {
+      "value": 0.5,
+      "unit": "mm"
+    },
+    "package_height": {
+      "value": 0.5,
+      "unit": "mm"
+    },
+    "insulation_resistance": {
+      "min": 10000,
+      "unit": "MOhm",
+      "notes": "for C <= 0.047uF; here measured per spec"
+    },
+    "esr": {
+      "typ": 0.1,
+      "unit": "Ohm",
+      "at_frequency": {"value": 100, "unit": "MHz"},
+      "notes": "ESR rises at lower frequencies; use for high-frequency decoupling verification only"
+    }
+  },
+  "footprint": {
+    "path": "footprints/capacitors/mlcc/GRM155R71C104KA88D.kicad_mod",
+    "format": "kicad_mod",
+    "format_version": "6.0",
+    "origin": "KiCad official library"
+  },
+  "symbol": {
+    "path": "symbols/capacitors/mlcc/GRM155R71C104KA88D.kicad_sym",
+    "format": "kicad_sym",
+    "format_version": "6.0",
+    "origin": "KiCad official library"
+  },
+  "datasheet": {
+    "url": "https://search.murata.co.jp/Ceramy/image/img/A01X/G101/ENG/GRM155R71C104KA88-01.pdf"
+  },
+  "meta": {
+    "verified": false,
+    "tags": [
+      "mlcc",
+      "x7r",
+      "0402",
+      "decoupling",
+      "jellybean"
+    ],
+    "added": "2026-05-19",
+    "revision": 2,
+    "history": [
+      {
+        "revision": 1,
+        "date": "2026-05-19",
+        "by": "JoonSJPK",
+        "change": "Initial entry"
+      },
+      {
+        "revision": 2,
+        "date": "2026-05-19",
+        "by": "JoonSJPK",
+        "change": "Added ESR at 100MHz and DC bias derating note on capacitance"
+      }
+    ]
+  }
+}

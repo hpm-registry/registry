@@ -1,4 +1,9 @@
 {
+  "capacitors": {
+    "mlcc": [
+      "GRM155R71C104KA88D"
+    ]
+  },
   "microcontrollers": {
     "32-bit-arm": [
       "STM32F103C8T6"

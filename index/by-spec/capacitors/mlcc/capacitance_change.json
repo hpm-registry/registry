@@ -1,0 +1,16 @@
+{
+  "category": "capacitors",
+  "subcategory": "mlcc",
+  "spec_key": "capacitance_change",
+  "unit": "%",
+  "note": "Sorted ascending by canonical value (typ > midpoint(min,max) > min > max). Fetch the full component file for non-numeric specs and full context.",
+  "entries": [
+    {
+      "id": "GRM155R71C104KA88D",
+      "min": -15,
+      "typ": null,
+      "max": 15,
+      "value": null
+    }
+  ]
+}
