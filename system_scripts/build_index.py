@@ -228,4 +228,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if "--quiet" in sys.argv:
+        import io, contextlib
+        with contextlib.redirect_stdout(io.StringIO()):
+            main()
+    else:
+        main()

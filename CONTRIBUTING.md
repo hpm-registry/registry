@@ -25,6 +25,7 @@ review step, then places all files into the correct locations and validates.
 ```bash
 pip install -r requirements.txt
 export ANTHROPIC_API_KEY=sk-ant-...   # get one at https://console.anthropic.com
+git config core.hooksPath hooks       # install git hooks (blocks commits with a stale index)
 ```
 
 **Run:**
