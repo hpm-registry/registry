@@ -1,0 +1,37 @@
+name: sync-r2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "components/**"
+      - "footprints/**"
+      - "symbols/**"
+      - "3d_models/**"
+      - "index/**"
+      - "schema/**"
+
+concurrency:
+  group: sync-r2
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
+        run: |
+          aws s3 sync components/ s3://hpm-registry/components/ --endpoint-url $ENDPOINT --delete
+          aws s3 sync footprints/ s3://hpm-registry/footprints/ --endpoint-url $ENDPOINT --delete
+          aws s3 sync symbols/    s3://hpm-registry/symbols/    --endpoint-url $ENDPOINT --delete
+          aws s3 sync 3d_models/  s3://hpm-registry/3d_models/  --endpoint-url $ENDPOINT --delete
+          aws s3 sync index/      s3://hpm-registry/index/      --endpoint-url $ENDPOINT --delete
+          aws s3 sync schema/     s3://hpm-registry/schema/     --endpoint-url $ENDPOINT --delete
