@@ -1,0 +1,199 @@
+{
+  "schema_version": "1.7.0",
+  "id": "AMS1117-3.3",
+  "mpn": "AMS1117-3.3",
+  "manufacturer": "UMW",
+  "category": "regulators",
+  "subcategory": "ldo",
+  "description": "1A 3.3V fixed LDO linear regulator, 1.2V dropout, SOT-223-3",
+  "package": {
+    "name": "SOT-223-3",
+    "type": "smd",
+    "pin_count": 3
+  },
+  "lifecycle_status": "active",
+  "specs": {
+    "output_voltage": {
+      "min": 3.235,
+      "typ": 3.3,
+      "max": 3.365,
+      "unit": "V"
+    },
+    "output_current": {
+      "max": 1,
+      "unit": "A"
+    },
+    "input_voltage": {
+      "min": 4.75,
+      "max": 12,
+      "unit": "V",
+      "notes": "Recommended operating; absolute max 18V"
+    },
+    "input_voltage_abs_max": {
+      "max": 18,
+      "unit": "V"
+    },
+    "dropout_voltage": {
+      "typ": 1.2,
+      "max": 1.3,
+      "unit": "V",
+      "notes": "IOUT=1A"
+    },
+    "quiescent_current": {
+      "typ": 5,
+      "max": 10,
+      "unit": "mA",
+      "notes": "4.25V<=VIN<=6.5V"
+    },
+    "line_regulation": {
+      "typ": 9,
+      "max": 18,
+      "unit": "mV",
+      "notes": "VINMIN<=VIN<=12V, IOUT=10mA"
+    },
+    "load_regulation": {
+      "typ": 10,
+      "max": 18,
+      "unit": "mV",
+      "notes": "10mA<=IOUT<=1A"
+    },
+    "psrr": {
+      "min": 60,
+      "typ": 75,
+      "unit": "dB",
+      "notes": "f=120Hz, VIN-VOUT=3V, VRIPPLE=1Vpp"
+    },
+    "current_limit": {
+      "min": 2.1,
+      "max": 2.5,
+      "unit": "A"
+    },
+    "thermal_shutdown": {
+      "typ": 150,
+      "unit": "degC"
+    },
+    "thermal_resistance_ja": {
+      "value": 88,
+      "unit": "degC/W"
+    },
+    "operating_temperature": {
+      "min": -40,
+      "max": 125,
+      "unit": "degC",
+      "notes": "Junction temperature"
+    },
+    "storage_temperature": {
+      "min": -65,
+      "max": 150,
+      "unit": "degC"
+    },
+    "esd_hbm": {
+      "min": 2000,
+      "unit": "V"
+    },
+    "rms_output_noise": {
+      "typ": 0.003,
+      "unit": "%",
+      "notes": "% of VOUT, 10Hz to 10kHz"
+    }
+  },
+  "pins": {
+    "1": {
+      "name": "GND",
+      "type": "ground",
+      "description": "Ground"
+    },
+    "2": {
+      "name": "VOUT",
+      "type": "power-out",
+      "description": "Regulated output voltage"
+    },
+    "3": {
+      "name": "VIN",
+      "type": "power-in",
+      "description": "Input supply voltage"
+    }
+  },
+  "power_domains": [
+    {
+      "name": "VIN",
+      "pins": [
+        "VIN"
+      ],
+      "voltage": {
+        "min": 4.75,
+        "max": 12,
+        "unit": "V"
+      },
+      "decoupling": "10uF input capacitor close to VIN pin"
+    },
+    {
+      "name": "VOUT",
+      "pins": [
+        "VOUT"
+      ],
+      "voltage": {
+        "min": 3.235,
+        "max": 3.365,
+        "unit": "V"
+      },
+      "decoupling": "22uF tantalum output capacitor required for stability"
+    }
+  ],
+  "required_externals": [
+    {
+      "value": "10uF",
+      "description": "Input bypass capacitor",
+      "connects": [
+        "VIN",
+        "GND"
+      ]
+    },
+    {
+      "value": "22uF",
+      "description": "Output capacitor required for stability (tantalum recommended)",
+      "connects": [
+        "VOUT",
+        "GND"
+      ]
+    }
+  ],
+  "aliases": [
+    "AMS1117-3.3V"
+  ],
+  "footprint": {
+    "path": "footprints/regulators/ldo/AMS1117-3.3.kicad_mod",
+    "format": "kicad_mod",
+    "format_version": "6.0",
+    "origin": "KiCad official library"
+  },
+  "symbol": {
+    "path": "symbols/regulators/ldo/AMS1117-3.3.kicad_sym",
+    "format": "kicad_sym",
+    "format_version": "6.0",
+    "origin": "KiCad official library"
+  },
+  "datasheet": {
+    "url": "https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5011/AMS1117.pdf"
+  },
+  "variant_of": null,
+  "meta": {
+    "verified": false,
+    "tags": [
+      "ldo",
+      "jellybean",
+      "fixed-output",
+      "3v3"
+    ],
+    "added": "2026-05-19",
+    "revision": 1,
+    "history": [
+      {
+        "revision": 1,
+        "date": "2026-05-19",
+        "by": "JoonSJPK",
+        "change": "Initial entry"
+      }
+    ]
+  }
+}

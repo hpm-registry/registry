@@ -1,3 +1,4 @@
 {
+  "AMS1117-3.3": "components/regulators/ldo/AMS1117-3.3.json",
   "STM32F103C8T6": "components/microcontrollers/32-bit-arm/STM32F103C8T6.json"
 }
