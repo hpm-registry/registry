@@ -1,0 +1,16 @@
+{
+  "category": "regulators",
+  "subcategory": "ldo",
+  "spec_key": "output_current",
+  "unit": "A",
+  "note": "Sorted ascending by canonical value (typ > midpoint(min,max) > min > max). Fetch the full component file for non-numeric specs and full context.",
+  "entries": [
+    {
+      "id": "AMS1117-3.3",
+      "min": null,
+      "typ": null,
+      "max": 1,
+      "value": null
+    }
+  ]
+}

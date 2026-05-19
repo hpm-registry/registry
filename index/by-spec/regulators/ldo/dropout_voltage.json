@@ -1,0 +1,16 @@
+{
+  "category": "regulators",
+  "subcategory": "ldo",
+  "spec_key": "dropout_voltage",
+  "unit": "V",
+  "note": "Sorted ascending by canonical value (typ > midpoint(min,max) > min > max). Fetch the full component file for non-numeric specs and full context.",
+  "entries": [
+    {
+      "id": "AMS1117-3.3",
+      "min": null,
+      "typ": 1.2,
+      "max": 1.3,
+      "value": null
+    }
+  ]
+}

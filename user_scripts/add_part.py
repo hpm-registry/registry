@@ -739,6 +739,79 @@ def review_entries(entries):
             print("Please enter y, n, or e.")
 
 
+def _derive_base_id(id_a, id_b):
+    """Return the longest common prefix of two IDs, stripped of trailing separators."""
+    prefix = []
+    for a, b in zip(id_a, id_b):
+        if a == b:
+            prefix.append(a)
+        else:
+            break
+    base = "".join(prefix).rstrip("-_.")
+    return base if base else id_a
+
+
+def auto_detect_variant(entries):
+    """Check registry for package variants of the new part and set variant_of automatically."""
+    if not INDEX_BY_ID.is_file():
+        return entries
+
+    try:
+        with open(INDEX_BY_ID) as f:
+            by_id = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return entries
+
+    if not by_id:
+        return entries
+
+    # Load all existing entries for comparison
+    existing = []
+    for eid, rel_path in by_id.items():
+        try:
+            with open(REPO_ROOT / rel_path) as f:
+                existing.append(json.load(f))
+        except (OSError, json.JSONDecodeError):
+            continue
+
+    updated = []
+    for entry, fp_path in entries:
+        new_mpn = entry.get("mpn", "").lower()
+        new_mfr = entry.get("manufacturer", "").lower()
+        new_pkg = entry.get("package", {}).get("name", "")
+
+        best_score = 0.0
+        best_match = None
+
+        for ex in existing:
+            if ex.get("manufacturer", "").lower() != new_mfr:
+                continue
+            ex_pkg = ex.get("package", {}).get("name", "")
+            if ex_pkg == new_pkg:
+                continue  # same package = duplicate, not variant
+            ex_mpn = ex.get("mpn", "").lower()
+            score = difflib.SequenceMatcher(None, new_mpn, ex_mpn).ratio()
+            if score > best_score:
+                best_score = score
+                best_match = ex
+
+        if best_score >= 0.88 and best_match is not None:
+            # Use existing variant_of if already set, otherwise derive from ID prefix
+            base_id = best_match.get("variant_of") or _derive_base_id(
+                entry["id"], best_match["id"]
+            )
+            entry["variant_of"] = base_id
+            print(
+                f"  Auto-detected variant: {entry['id']} is a package variant of "
+                f"{best_match['id']} (similarity {best_score:.0%})\n"
+                f"  Set variant_of = \"{base_id}\""
+            )
+
+        updated.append((entry, fp_path))
+
+    return updated
+
+
 def place_files(entries, symbol_path, model_path):
     """Copy all files to their registry locations and patch footprints with model blocks."""
     written_json = []
@@ -962,6 +1035,9 @@ def main():
 
     # Step 4: Interactive review
     entries = review_entries(entries)
+
+    # Step 4b: Auto-detect variant relationships
+    entries = auto_detect_variant(entries)
 
     # Step 5: Place files
     print("\nWriting files...")
