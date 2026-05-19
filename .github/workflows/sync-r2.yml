@@ -3,6 +3,13 @@ name: sync-r2
 on:
   push:
     branches: [main]
+    paths:
+      - "components/**"
+      - "footprints/**"
+      - "symbols/**"
+      - "3d_models/**"
+      - "index/**"
+      - "schema/**"
   workflow_dispatch:
 
 concurrency:
