@@ -821,6 +821,17 @@ def auto_detect_variant(entries):
     return updated
 
 
+def _find_duplicate_asset(incoming_path, search_dir):
+    """Return repo-relative path of an existing file with identical content, or None."""
+    import hashlib
+    incoming_hash = hashlib.sha256(Path(incoming_path).read_bytes()).hexdigest()
+    for existing in sorted(Path(search_dir).rglob("*")):
+        if existing.is_file() and existing.suffix == Path(incoming_path).suffix:
+            if hashlib.sha256(existing.read_bytes()).hexdigest() == incoming_hash:
+                return existing.relative_to(REPO_ROOT)
+    return None
+
+
 def place_files(entries, symbol_path, model_path):
     """Copy all files to their registry locations and patch footprints with model blocks."""
     written_json = []
@@ -834,13 +845,25 @@ def place_files(entries, symbol_path, model_path):
         for base_dir in ("components", "footprints", "symbols"):
             (REPO_ROOT / base_dir / cat / sub).mkdir(parents=True, exist_ok=True)
 
-        # Copy footprint
+        # Copy footprint — reuse existing file if content is identical
         fp_dest = REPO_ROOT / entry["footprint"]["path"]
-        shutil.copy2(fp_path, fp_dest)
+        existing_fp = _find_duplicate_asset(fp_path, REPO_ROOT / "footprints")
+        if existing_fp:
+            print(f"  Footprint already hosted at {existing_fp} — reusing (no duplicate written)")
+            entry["footprint"]["path"] = str(existing_fp)
+            fp_dest = REPO_ROOT / existing_fp
+        else:
+            shutil.copy2(fp_path, fp_dest)
 
-        # Copy symbol (same file for all density variants)
+        # Copy symbol — reuse existing file if content is identical
         sym_dest = REPO_ROOT / entry["symbol"]["path"]
-        shutil.copy2(symbol_path, sym_dest)
+        existing_sym = _find_duplicate_asset(symbol_path, REPO_ROOT / "symbols")
+        if existing_sym:
+            print(f"  Symbol already hosted at {existing_sym} — reusing (no duplicate written)")
+            entry["symbol"]["path"] = str(existing_sym)
+            sym_dest = REPO_ROOT / existing_sym
+        else:
+            shutil.copy2(symbol_path, sym_dest)
 
         # Copy 3D model and patch footprint
         if model_path and "3d_model" in entry:

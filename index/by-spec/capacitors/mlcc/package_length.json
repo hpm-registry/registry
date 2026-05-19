@@ -1,0 +1,16 @@
+{
+  "category": "capacitors",
+  "subcategory": "mlcc",
+  "spec_key": "package_length",
+  "unit": "mm",
+  "note": "Sorted ascending by canonical value (typ > midpoint(min,max) > min > max). Fetch the full component file for non-numeric specs and full context.",
+  "entries": [
+    {
+      "id": "GRM155R71C104KA88D",
+      "min": null,
+      "typ": null,
+      "max": null,
+      "value": 1.0
+    }
+  ]
+}
