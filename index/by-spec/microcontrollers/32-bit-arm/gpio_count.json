@@ -1,0 +1,16 @@
+{
+  "category": "microcontrollers",
+  "subcategory": "32-bit-arm",
+  "spec_key": "gpio_count",
+  "unit": "",
+  "note": "Sorted ascending by canonical value (typ > midpoint(min,max) > min > max). Fetch the full component file for non-numeric specs and full context.",
+  "entries": [
+    {
+      "id": "STM32F103C8T6",
+      "min": null,
+      "typ": null,
+      "max": null,
+      "value": 37
+    }
+  ]
+}

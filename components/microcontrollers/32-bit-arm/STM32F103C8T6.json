@@ -1,0 +1,563 @@
+{
+  "schema_version": "1.7.0",
+  "id": "STM32F103C8T6",
+  "mpn": "STM32F103C8T6",
+  "manufacturer": "STMicroelectronics",
+  "category": "microcontrollers",
+  "subcategory": "32-bit-arm",
+  "description": "ARM Cortex-M3 32-bit MCU, 72MHz, 64KB Flash, 20KB SRAM, USB, CAN, LQFP-48",
+  "package": {
+    "name": "LQFP-48",
+    "type": "smd",
+    "pin_count": 48
+  },
+  "lifecycle_status": "active",
+  "specs": {
+    "core": {
+      "value": "ARM Cortex-M3",
+      "unit": ""
+    },
+    "cpu_frequency_max": {
+      "value": 72,
+      "unit": "MHz"
+    },
+    "flash_memory": {
+      "value": 64,
+      "unit": "KB"
+    },
+    "sram": {
+      "value": 20,
+      "unit": "KB"
+    },
+    "supply_voltage": {
+      "min": 2.0,
+      "max": 3.6,
+      "unit": "V"
+    },
+    "gpio_count": {
+      "value": 37,
+      "unit": ""
+    },
+    "adc_resolution": {
+      "value": 12,
+      "unit": "bit"
+    },
+    "adc_channels": {
+      "value": 10,
+      "unit": ""
+    },
+    "adc_count": {
+      "value": 2,
+      "unit": ""
+    },
+    "timer_count": {
+      "value": 4,
+      "unit": "",
+      "notes": "3 general-purpose 16-bit + 1 advanced-control"
+    },
+    "usart_count": {
+      "value": 3,
+      "unit": ""
+    },
+    "spi_count": {
+      "value": 2,
+      "unit": ""
+    },
+    "i2c_count": {
+      "value": 2,
+      "unit": ""
+    },
+    "dma_channels": {
+      "value": 7,
+      "unit": ""
+    },
+    "usb": {
+      "value": "USB 2.0 Full-Speed",
+      "unit": ""
+    },
+    "can": {
+      "value": "CAN 2.0B",
+      "unit": ""
+    },
+    "spi_max_speed": {
+      "value": 18,
+      "unit": "MHz"
+    },
+    "i2c_max_speed": {
+      "value": 400,
+      "unit": "kHz"
+    },
+    "usart_max_speed": {
+      "value": 4.5,
+      "unit": "Mbps"
+    },
+    "idd_run": {
+      "typ": 36,
+      "unit": "mA",
+      "notes": "72 MHz, all peripherals enabled, from Flash"
+    },
+    "idd_stop": {
+      "typ": 24,
+      "unit": "uA",
+      "notes": "Regulator in Run mode"
+    },
+    "idd_standby": {
+      "typ": 3.4,
+      "unit": "uA",
+      "notes": "with LSI and IWDG on"
+    },
+    "operating_temperature": {
+      "min": -40,
+      "max": 85,
+      "unit": "degC"
+    }
+  },
+  "pins": {
+    "1": {
+      "name": "VBAT",
+      "type": "power-in",
+      "description": "Backup supply"
+    },
+    "2": {
+      "name": "PC13-TAMPER-RTC",
+      "type": "signal-bidir"
+    },
+    "3": {
+      "name": "PC14-OSC32_IN",
+      "type": "signal-bidir"
+    },
+    "4": {
+      "name": "PC15-OSC32_OUT",
+      "type": "signal-bidir"
+    },
+    "5": {
+      "name": "PD0-OSC_IN",
+      "type": "signal-in",
+      "description": "HSE input / PD0"
+    },
+    "6": {
+      "name": "PD1-OSC_OUT",
+      "type": "signal-out",
+      "description": "HSE output / PD1"
+    },
+    "7": {
+      "name": "NRST",
+      "type": "signal-bidir",
+      "description": "Reset"
+    },
+    "8": {
+      "name": "VSSA",
+      "type": "ground",
+      "description": "Analog ground"
+    },
+    "9": {
+      "name": "VDDA",
+      "type": "power-in",
+      "description": "Analog supply"
+    },
+    "10": {
+      "name": "PA0-WKUP",
+      "type": "signal-bidir"
+    },
+    "11": {
+      "name": "PA1",
+      "type": "signal-bidir"
+    },
+    "12": {
+      "name": "PA2",
+      "type": "signal-bidir"
+    },
+    "13": {
+      "name": "PA3",
+      "type": "signal-bidir"
+    },
+    "14": {
+      "name": "PA4",
+      "type": "signal-bidir"
+    },
+    "15": {
+      "name": "PA5",
+      "type": "signal-bidir"
+    },
+    "16": {
+      "name": "PA6",
+      "type": "signal-bidir"
+    },
+    "17": {
+      "name": "PA7",
+      "type": "signal-bidir"
+    },
+    "18": {
+      "name": "PB0",
+      "type": "signal-bidir"
+    },
+    "19": {
+      "name": "PB1",
+      "type": "signal-bidir"
+    },
+    "20": {
+      "name": "PB2",
+      "type": "signal-bidir",
+      "description": "BOOT1"
+    },
+    "21": {
+      "name": "PB10",
+      "type": "signal-bidir"
+    },
+    "22": {
+      "name": "PB11",
+      "type": "signal-bidir"
+    },
+    "23": {
+      "name": "VSS_1",
+      "type": "ground"
+    },
+    "24": {
+      "name": "VDD_1",
+      "type": "power-in"
+    },
+    "25": {
+      "name": "PB12",
+      "type": "signal-bidir"
+    },
+    "26": {
+      "name": "PB13",
+      "type": "signal-bidir"
+    },
+    "27": {
+      "name": "PB14",
+      "type": "signal-bidir"
+    },
+    "28": {
+      "name": "PB15",
+      "type": "signal-bidir"
+    },
+    "29": {
+      "name": "PA8",
+      "type": "signal-bidir"
+    },
+    "30": {
+      "name": "PA9",
+      "type": "signal-bidir"
+    },
+    "31": {
+      "name": "PA10",
+      "type": "signal-bidir"
+    },
+    "32": {
+      "name": "PA11",
+      "type": "signal-bidir",
+      "description": "USB DM / CAN RX"
+    },
+    "33": {
+      "name": "PA12",
+      "type": "signal-bidir",
+      "description": "USB DP / CAN TX"
+    },
+    "34": {
+      "name": "PA13",
+      "type": "signal-bidir",
+      "description": "JTMS/SWDIO"
+    },
+    "35": {
+      "name": "VSS_2",
+      "type": "ground"
+    },
+    "36": {
+      "name": "VDD_2",
+      "type": "power-in"
+    },
+    "37": {
+      "name": "PA14",
+      "type": "signal-bidir",
+      "description": "JTCK/SWCLK"
+    },
+    "38": {
+      "name": "PA15",
+      "type": "signal-bidir",
+      "description": "JTDI"
+    },
+    "39": {
+      "name": "PB3",
+      "type": "signal-bidir",
+      "description": "JTDO"
+    },
+    "40": {
+      "name": "PB4",
+      "type": "signal-bidir",
+      "description": "NJTRST"
+    },
+    "41": {
+      "name": "PB5",
+      "type": "signal-bidir"
+    },
+    "42": {
+      "name": "PB6",
+      "type": "signal-bidir"
+    },
+    "43": {
+      "name": "PB7",
+      "type": "signal-bidir"
+    },
+    "44": {
+      "name": "BOOT0",
+      "type": "signal-in"
+    },
+    "45": {
+      "name": "PB8",
+      "type": "signal-bidir"
+    },
+    "46": {
+      "name": "PB9",
+      "type": "signal-bidir"
+    },
+    "47": {
+      "name": "VSS_3",
+      "type": "ground"
+    },
+    "48": {
+      "name": "VDD_3",
+      "type": "power-in"
+    }
+  },
+  "pin_functions": {
+    "notes": "USB and CAN share PA11/PA12; mutually exclusive in hardware.",
+    "SPI1": [
+      "PA4/NSS",
+      "PA5/SCK",
+      "PA6/MISO",
+      "PA7/MOSI"
+    ],
+    "SPI2": [
+      "PB12/NSS",
+      "PB13/SCK",
+      "PB14/MISO",
+      "PB15/MOSI"
+    ],
+    "I2C1": [
+      "PB6/SCL",
+      "PB7/SDA"
+    ],
+    "I2C2": [
+      "PB10/SCL",
+      "PB11/SDA"
+    ],
+    "USART1": [
+      "PA9/TX",
+      "PA10/RX",
+      "PA11/CTS",
+      "PA12/RTS",
+      "PA8/CK"
+    ],
+    "USART2": [
+      "PA2/TX",
+      "PA3/RX",
+      "PA0/CTS",
+      "PA1/RTS",
+      "PA4/CK"
+    ],
+    "USART3": [
+      "PB10/TX",
+      "PB11/RX",
+      "PB13/CTS",
+      "PB14/RTS",
+      "PB12/CK"
+    ],
+    "USB": [
+      "PA11/DM",
+      "PA12/DP"
+    ],
+    "CAN": [
+      "PA11/RX",
+      "PA12/TX"
+    ],
+    "ADC1": [
+      "PA0/IN0",
+      "PA1/IN1",
+      "PA2/IN2",
+      "PA3/IN3",
+      "PA4/IN4",
+      "PA5/IN5",
+      "PA6/IN6",
+      "PA7/IN7",
+      "PB0/IN8",
+      "PB1/IN9"
+    ],
+    "TIM1": [
+      "PA8/CH1",
+      "PA9/CH2",
+      "PA10/CH3",
+      "PA11/CH4",
+      "PA12/ETR",
+      "PA6/BKIN",
+      "PA7/CH1N",
+      "PB0/CH2N",
+      "PB1/CH3N"
+    ],
+    "TIM2": [
+      "PA0/CH1_ETR",
+      "PA1/CH2",
+      "PA2/CH3",
+      "PA3/CH4"
+    ],
+    "TIM3": [
+      "PA6/CH1",
+      "PA7/CH2",
+      "PB0/CH3",
+      "PB1/CH4"
+    ],
+    "TIM4": [
+      "PB6/CH1",
+      "PB7/CH2",
+      "PB8/CH3",
+      "PB9/CH4"
+    ]
+  },
+  "power_domains": [
+    {
+      "name": "VDD",
+      "pins": [
+        "VDD_1",
+        "VDD_2",
+        "VDD_3"
+      ],
+      "voltage": {
+        "min": 2.0,
+        "max": 3.6,
+        "unit": "V"
+      },
+      "decoupling": "100nF ceramic per VDD pin + one 4.7uF bulk capacitor on VDD_3"
+    },
+    {
+      "name": "VDDA",
+      "pins": [
+        "VDDA"
+      ],
+      "voltage": {
+        "min": 2.0,
+        "max": 3.6,
+        "unit": "V",
+        "notes": "min 2.4V when ADC used"
+      },
+      "decoupling": "1uF + 10nF ceramic close to VDDA pin; ferrite bead to VDD recommended"
+    },
+    {
+      "name": "VBAT",
+      "pins": [
+        "VBAT"
+      ],
+      "voltage": {
+        "min": 1.8,
+        "max": 3.6,
+        "unit": "V"
+      },
+      "decoupling": "Connect to VDD if backup not used, otherwise to battery with 100nF decoupling"
+    }
+  ],
+  "required_externals": [
+    {
+      "value": "100nF",
+      "description": "Decoupling capacitor for each VDD pin",
+      "connects": [
+        "VDD",
+        "GND"
+      ]
+    },
+    {
+      "value": "4.7uF",
+      "description": "Bulk decoupling capacitor on VDD_3",
+      "connects": [
+        "VDD_3",
+        "GND"
+      ]
+    },
+    {
+      "value": "1uF + 10nF",
+      "description": "VDDA analog supply decoupling",
+      "connects": [
+        "VDDA",
+        "VSSA"
+      ]
+    },
+    {
+      "value": "10k",
+      "description": "BOOT0 pull-down for normal Flash boot",
+      "connects": [
+        "BOOT0",
+        "GND"
+      ]
+    },
+    {
+      "value": "100nF",
+      "description": "NRST reset filter capacitor",
+      "connects": [
+        "NRST",
+        "GND"
+      ]
+    },
+    {
+      "description": "HSE crystal (4-16 MHz, typically 8 MHz) for USB operation",
+      "connects": [
+        "OSC_IN",
+        "OSC_OUT"
+      ],
+      "notes": "Required for USB; load caps per crystal spec (typ 18-20pF)"
+    },
+    {
+      "value": "1.5k",
+      "description": "USB pull-up on D+ to indicate full-speed device (if USB used)",
+      "connects": [
+        "PA12",
+        "VDD"
+      ],
+      "notes": "Required to be compliant with USB 2.0 full-speed electrical specification"
+    }
+  ],
+  "compliance": {
+    "rohs": "compliant",
+    "reach": "unknown",
+    "aec_q": "none",
+    "halogen_free": true
+  },
+  "footprint": {
+    "path": "footprints/microcontrollers/32-bit-arm/STM32F103C8T6.kicad_mod",
+    "format": "kicad_mod",
+    "format_version": "6.0",
+    "origin": "KiCad official library"
+  },
+  "symbol": {
+    "path": "symbols/microcontrollers/32-bit-arm/STM32F103C8T6.kicad_sym",
+    "format": "kicad_sym",
+    "format_version": "6.0",
+    "origin": "KiCad official library"
+  },
+  "datasheet": {
+    "url": "https://www.st.com/en/microcontrollers-microprocessors/stm32f103c8.html#overview",
+    "revision": "Rev 20"
+  },
+  "meta": {
+    "verified": false,
+    "tags": [
+      "stm32",
+      "cortex-m3",
+      "jellybean",
+      "usb",
+      "can"
+    ],
+    "added": "2026-05-19",
+    "revision": 1,
+    "history": [
+      {
+        "revision": 1,
+        "date": "2026-05-19",
+        "by": "JoonSJPK",
+        "change": "Initial entry"
+      }
+    ]
+  },
+  "3d_model": {
+    "path": "3d_models/microcontrollers/32-bit-arm/STM32F103C8T6.step",
+    "format": "step",
+    "origin": "KiCad official library"
+  }
+}
